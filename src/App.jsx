@@ -5,8 +5,20 @@ import { Toaster } from 'react-hot-toast';
 // Import các trang giao diện
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import { ReceptionistDashboard } from './pages/ReceptionistPages';
-import { CustomerHome, CustomerProfile } from './pages/CustomerPages';
+import { 
+  ReceptionistDashboard, 
+  ReceptionistBookings, 
+  ReceptionistStays, 
+  ReceptionistCheckIn 
+} from './pages/ReceptionistPages';
+import { 
+  CustomerHome, 
+  CustomerHotels, 
+  CustomerHotelDetail, 
+  CustomerBookings, 
+  CustomerFavorites, 
+  CustomerProfile 
+} from './pages/CustomerPages';
 
 export default function App() {
   return (
@@ -22,9 +34,16 @@ export default function App() {
 
           {/* Phân hệ Lễ tân (Receptionist) */}
           <Route path="/receptionist" element={<ReceptionistDashboard />} />
+          <Route path="/receptionist/bookings" element={<ReceptionistBookings />} />
+          <Route path="/receptionist/checkin" element={<ReceptionistCheckIn />} />
+          <Route path="/receptionist/stays" element={<ReceptionistStays />} />
 
           {/* Phân hệ Khách hàng (Customer) */}
           <Route path="/customer" element={<CustomerHome />} />
+          <Route path="/customer/hotels" element={<CustomerHotels />} />
+          <Route path="/customer/hotels/:id" element={<CustomerHotelDetail />} />
+          <Route path="/customer/bookings" element={<CustomerBookings />} />
+          <Route path="/customer/favorites" element={<CustomerFavorites />} />
           <Route path="/customer/profile" element={<CustomerProfile />} />
 
           {/* Đường dẫn sai cấu trúc sẽ đẩy về Login */}

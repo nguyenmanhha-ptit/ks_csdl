@@ -1,0 +1,119 @@
+const express = require('express');
+const cors = require('cors');
+const jwt = require('jsonwebtoken');
+const { dbPromise } = require('./db');
+require('dotenv').config();
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey_luxstay';
+
+const auth = (req, res, next) => {
+  const token = req.header('Authorization')?.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'No token' });
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    res.status(401).json({ message: 'Invalid token' });
+  }
+};
+
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { identifier, password } = req.body;
+    const db = await dbPromise;
+
+    // Check Employees
+    let user = await db.get('SELECT * FROM Employees WHERE Username = ? OR Email = ? OR Phone = ?', [identifier, identifier, identifier]);
+    let isCustomer = false;
+
+    // Check Customers if not employee
+    if (!user) {
+      user = await db.get('SELECT * FROM Customers WHERE Email = ? OR Phone = ?', [identifier, identifier]);
+      if (user) isCustomer = true;
+    }
+
+    if (!user) {
+      return res.status(401).json({ message: 'Tài khoản không tồn tại!' });
+    }
+
+    if (user.PasswordHash !== password) {
+      return res.status(401).json({ message: 'Sai mật khẩu!' });
+    }
+
+    const payload = {
+      id: isCustomer ? user.CustomerID : user.EmployeeID,
+      role: isCustomer ? 'Customer' : user.Role,
+      name: user.FullName,
+      email: user.Email || identifier
+    };
+    
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1d' });
+    res.json({ token, user: payload });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.get('/api/auth/me', auth, (req, res) => {
+  res.json(req.user);
+});
+
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { fullName, phone, email, password, nationality } = req.body;
+    const db = await dbPromise;
+    
+    const exists = await db.get('SELECT * FROM Customers WHERE Phone = ? OR Email = ?', [phone, email]);
+    if (exists) return res.status(400).json({ message: 'Số điện thoại hoặc Email đã tồn tại' });
+
+    const result = await db.run('INSERT INTO Customers (FullName, Phone, Email, PasswordHash, Nationality) VALUES (?, ?, ?, ?, ?)', 
+      [fullName, phone, email, password, nationality || 'Vietnam']);
+    
+    const payload = { id: result.lastID, role: 'Customer', name: fullName, email };
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1d' });
+    res.json({ token, user: payload });
+  } catch (err) {
+    res.status(500).json({ message: 'Lỗi đăng ký: ' + err.message });
+  }
+});
+
+app.get('/api/stays', auth, async (req, res) => {
+  try {
+    const db = await dbPromise;
+    const stays = await db.all(`
+      SELECT s.StayID, s.RoomID, r.RoomNumber, c.FullName as CustomerName, c.Phone as CustomerPhone, 
+             s.ActualCheckIn, s.CheckOutDate, s.BookingID
+      FROM Stays s
+      JOIN Rooms r ON s.RoomID = r.RoomID
+      JOIN Bookings b ON s.BookingID = b.BookingID
+      JOIN Customers c ON b.CustomerID = c.CustomerID
+    `);
+    res.json(stays);
+  } catch (err) {
+    res.json([]);
+  }
+});
+
+app.get('/api/hotels', async (req, res) => {
+  try {
+    const db = await dbPromise;
+    const hotels = await db.all('SELECT * FROM Hotels');
+    res.json({ data: hotels });
+  } catch (err) {
+    res.json({ data: [] });
+  }
+});
+
+app.use('/api', (req, res) => {
+  res.json({ data: [], message: 'API chưa cài đặt chi tiết trên SQLite!' });
+});
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log('✅ Backend Server (SQLite) đang chạy tại port:', PORT);
+});
