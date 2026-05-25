@@ -1,103 +1,32 @@
-const sqlite3 = require('sqlite3').verbose();
-const { open } = require('sqlite');
+const mysql = require('mysql2/promise');
+require('dotenv').config();
 
-let dbPromise = null;
+const dbConfig = {
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '123456', // Bạn nhớ dặn user đổi mật khẩu nếu cần
+  database: process.env.DB_NAME || 'HotelManagementDB',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+};
+
+let pool = null;
 
 async function setupDatabase() {
-  const db = await open({
-    filename: './database.sqlite',
-    driver: sqlite3.Database
-  });
-
-  console.log('✅ Connected to SQLite database.');
-
-  // Tạo các bảng cơ bản nếu chưa tồn tại
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS Employees (
-      EmployeeID INTEGER PRIMARY KEY AUTOINCREMENT,
-      FullName TEXT NOT NULL,
-      Phone TEXT,
-      Email TEXT,
-      Username TEXT UNIQUE NOT NULL,
-      PasswordHash TEXT NOT NULL,
-      Role TEXT NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS Customers (
-      CustomerID INTEGER PRIMARY KEY AUTOINCREMENT,
-      FullName TEXT NOT NULL,
-      Phone TEXT UNIQUE NOT NULL,
-      Email TEXT UNIQUE,
-      PasswordHash TEXT NOT NULL,
-      Nationality TEXT DEFAULT 'Vietnam'
-    );
-
-    CREATE TABLE IF NOT EXISTS Hotels (
-      HotelID INTEGER PRIMARY KEY AUTOINCREMENT,
-      HotelName TEXT NOT NULL,
-      StarRating INTEGER,
-      City TEXT,
-      Country TEXT
-    );
-
-    CREATE TABLE IF NOT EXISTS Rooms (
-      RoomID INTEGER PRIMARY KEY AUTOINCREMENT,
-      HotelID INTEGER,
-      RoomNumber TEXT NOT NULL,
-      Status TEXT DEFAULT 'Available'
-    );
-
-    CREATE TABLE IF NOT EXISTS Bookings (
-      BookingID INTEGER PRIMARY KEY AUTOINCREMENT,
-      CustomerID INTEGER,
-      HotelID INTEGER,
-      BookingCode TEXT UNIQUE NOT NULL,
-      CheckInDate TEXT,
-      CheckOutDate TEXT,
-      BookingStatus TEXT DEFAULT 'Pending'
-    );
-
-    CREATE TABLE IF NOT EXISTS Stays (
-      StayID INTEGER PRIMARY KEY AUTOINCREMENT,
-      BookingID INTEGER,
-      RoomID INTEGER,
-      ActualCheckIn TEXT,
-      CheckOutDate TEXT
-    );
-  `);
-
-  // Tạo dữ liệu mẫu nếu CSDL đang trống
-  const empCount = await db.get('SELECT COUNT(*) as count FROM Employees');
-  if (empCount.count === 0) {
-    console.log('🌱 Seeding demo data into SQLite...');
-    await db.exec(`
-      INSERT INTO Employees (FullName, Username, PasswordHash, Role, Email) VALUES 
-      ('Admin Demo', 'admin', 'Admin@123', 'Admin', 'admin@luxstay.com'),
-      ('Manager Demo', 'manager1', 'Manager@123', 'Manager', 'manager@luxstay.com'),
-      ('Receptionist Demo', 'receptionist1', 'Recep@123', 'Receptionist', 'recep@luxstay.com'),
-      ('Housekeeping Demo', 'housekeeping1', 'House@123', 'Housekeeping', 'house@luxstay.com');
-
-      INSERT INTO Customers (FullName, Phone, Email, PasswordHash, Nationality) VALUES
-      ('Customer Demo', 'customer1', 'customer1@luxstay.com', 'Cust@123', 'Vietnam');
-
-      INSERT INTO Hotels (HotelName, StarRating, City, Country) VALUES
-      ('LuxStay Hà Nội', 5, 'Hà Nội', 'Vietnam'),
-      ('LuxStay Đà Nẵng', 4, 'Đà Nẵng', 'Vietnam');
-
-      INSERT INTO Rooms (HotelID, RoomNumber, Status) VALUES
-      (1, '101', 'Available'),
-      (1, '102', 'Occupied'),
-      (2, '201', 'Available');
-    `);
+  try {
+    pool = mysql.createPool(dbConfig);
+    // Thử kết nối để xem có lỗi không
+    const connection = await pool.getConnection();
+    console.log('✅ Connected to MySQL database (HotelManagementDB).');
+    connection.release();
+    return pool;
+  } catch (err) {
+    console.error('Database Connection Failed! Sai mật khẩu MySQL hoặc DB chưa tạo: ', err.message);
+    throw err;
   }
-
-  return db;
 }
 
-if (!dbPromise) {
-  dbPromise = setupDatabase();
-}
+const dbPromise = setupDatabase();
 
-module.exports = {
-  dbPromise
-};
+module.exports = { dbPromise };
