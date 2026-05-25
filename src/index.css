@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body { @apply font-body bg-gray-950 text-gray-100; }
+  h1,h2,h3 { @apply font-display; }
+}
+
+@layer components {
+  .btn-primary { @apply bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 shadow-lg shadow-primary-900/30 active:scale-95; }
+  .btn-secondary { @apply bg-gray-800 hover:bg-gray-700 text-gray-100 px-4 py-2 rounded-lg font-medium transition-all duration-200 border border-gray-700; }
+  .btn-gold { @apply bg-gold-500 hover:bg-gold-600 text-gray-900 px-4 py-2 rounded-lg font-semibold transition-all duration-200 active:scale-95; }
+  .btn-danger { @apply bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-all; }
+  .card { @apply bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-xl; }
+  .input-field { @apply w-full bg-gray-800 border border-gray-700 text-gray-100 rounded-lg px-4 py-2.5 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 placeholder-gray-500 transition-colors; }
+  .label { @apply block text-sm font-medium text-gray-400 mb-1.5; }
+  .badge-available { @apply bg-emerald-900/50 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded-full text-xs font-medium; }
+  .badge-occupied { @apply bg-red-900/50 text-red-400 border border-red-800 px-2 py-0.5 rounded-full text-xs font-medium; }
+  .badge-maintenance { @apply bg-yellow-900/50 text-yellow-400 border border-yellow-800 px-2 py-0.5 rounded-full text-xs font-medium; }
+  .badge-pending { @apply bg-blue-900/50 text-blue-400 border border-blue-800 px-2 py-0.5 rounded-full text-xs font-medium; }
+  .badge-confirmed { @apply bg-emerald-900/50 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded-full text-xs font-medium; }
+  .badge-cancelled { @apply bg-gray-700 text-gray-400 border border-gray-600 px-2 py-0.5 rounded-full text-xs font-medium; }
+  .table-header { @apply bg-gray-800 text-gray-400 text-xs font-semibold uppercase tracking-wider px-4 py-3 text-left; }
+  .table-cell { @apply px-4 py-3 text-sm text-gray-300 border-b border-gray-800; }
+  .sidebar-link { @apply flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-all duration-150 text-sm font-medium; }
+  .sidebar-link.active { @apply bg-primary-900/50 text-primary-400 border-l-2 border-primary-500; }
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { @apply bg-gray-900; }
+::-webkit-scrollbar-thumb { @apply bg-gray-700 rounded-full; }
+.star-gold { color: #f59e0b; }
