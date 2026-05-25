@@ -161,6 +161,93 @@ app.get('/api/manager/dashboard', auth, async (req, res) => {
   }
 });
 
+app.get('/api/bookings/search', auth, async (req, res) => {
+  try {
+    const db = await dbPromise;
+    const bookings = await db.all(`
+      SELECT b.BookingID, b.BookingCode, c.FullName as CustomerName, c.Phone as CustomerPhone, b.CheckInDate, b.CheckOutDate, b.BookingStatus, b.HotelID
+      FROM Bookings b
+      JOIN Customers c ON b.CustomerID = c.CustomerID
+    `);
+    res.json(bookings);
+  } catch (err) {
+    res.json([]);
+  }
+});
+
+app.post('/api/stays/checkin', auth, async (req, res) => {
+  try {
+    const { bookingId, roomId, depositAmount, representativeName } = req.body;
+    const db = await dbPromise;
+    await db.run('INSERT INTO Stays (BookingID, RoomID, ActualCheckIn) VALUES (?, ?, ?)', [bookingId, roomId, new Date().toISOString()]);
+    await db.run("UPDATE Rooms SET Status = 'Occupied' WHERE RoomID = ?", [roomId]);
+    await db.run("UPDATE Bookings SET BookingStatus = 'Confirmed' WHERE BookingID = ?", [bookingId]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.get('/api/hotels/:id', async (req, res) => {
+  try {
+    const db = await dbPromise;
+    const hotel = await db.get('SELECT * FROM Hotels WHERE HotelID = ?', [req.params.id]);
+    if (!hotel) return res.status(404).json({ message: 'Not found' });
+    const rooms = await db.all("SELECT RoomID, HotelID, RoomNumber, Status, 1500000 as PricePerNight, 'Standard' as TypeName, 2 as CapacityAdult, 1 as Floor FROM Rooms WHERE HotelID = ?", [req.params.id]);
+    const reviews = [];
+    res.json({ ...hotel, rooms, reviews, AvgRating: 5, ReviewCount: 12 });
+  } catch (err) {
+    res.json({ data: [] });
+  }
+});
+
+app.post('/api/bookings', auth, async (req, res) => {
+  try {
+    const { hotelId, roomIds, checkInDate, checkOutDate } = req.body;
+    const db = await dbPromise;
+    const code = 'BK' + Math.floor(Math.random() * 100000);
+    await db.run(
+      'INSERT INTO Bookings (CustomerID, HotelID, BookingCode, CheckInDate, CheckOutDate) VALUES (?, ?, ?, ?, ?)',
+      [req.user.id, hotelId, code, checkInDate, checkOutDate]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.get('/api/bookings/my', auth, async (req, res) => {
+  try {
+    const db = await dbPromise;
+    const bookings = await db.all(`
+      SELECT b.BookingID, b.BookingCode, b.CheckInDate, b.CheckOutDate, b.BookingStatus, h.HotelName, h.City, 2 as AdultCount, 1 as RoomCount 
+      FROM Bookings b JOIN Hotels h ON b.HotelID = h.HotelID 
+      WHERE b.CustomerID = ?
+    `, [req.user.id]);
+    res.json(bookings);
+  } catch (err) {
+    res.json([]);
+  }
+});
+
+app.patch('/api/bookings/:id/cancel', auth, async (req, res) => {
+  try {
+    const db = await dbPromise;
+    await db.run("UPDATE Bookings SET BookingStatus = 'Cancelled' WHERE BookingID = ? AND CustomerID = ?", [req.params.id, req.user.id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.get('/api/favorites', auth, (req, res) => {
+  res.json([]);
+});
+
+app.post('/api/favorites', auth, (req, res) => {
+  res.json({ favorited: true });
+});
+
 app.use('/api', (req, res) => {
   res.json({ data: [], message: 'API chưa cài đặt chi tiết trên SQLite!' });
 });
