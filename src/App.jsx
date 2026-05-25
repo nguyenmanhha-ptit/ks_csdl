@@ -20,6 +20,8 @@ import {
   CustomerFavorites, 
   CustomerProfile 
 } from './pages/CustomerPages';
+import { ManagerDashboard, ManagerHotels, ManagerRooms, ManagerEmployees } from './pages/ManagerPages';
+import { AdminDashboard, AdminAccounts } from './pages/AdminPages';
 
 const ComingSoon = ({ title }) => (
   <DashboardLayout>
@@ -59,9 +61,21 @@ export default function App() {
           <Route path="/customer/profile" element={<CustomerProfile />} />
 
           {/* Các phân hệ chưa có giao diện chi tiết */}
-          <Route path="/admin/*" element={<ComingSoon title="Admin" />} />
-          <Route path="/manager/*" element={<ComingSoon title="Quản lý (Manager)" />} />
           <Route path="/housekeeping/*" element={<ComingSoon title="Buồng phòng (Housekeeping)" />} />
+
+          {/* Phân hệ Quản lý (Manager) */}
+          <Route path="/manager" element={<ManagerDashboard />} />
+          <Route path="/manager/hotels" element={<ManagerHotels />} />
+          <Route path="/manager/rooms" element={<ManagerRooms />} />
+          <Route path="/manager/employees" element={<ManagerEmployees />} />
+          <Route path="/manager/*" element={<ComingSoon title="Chức năng (Manager)" />} />
+
+          {/* Phân hệ Admin */}
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/accounts" element={<AdminAccounts />} />
+          <Route path="/admin/employees" element={<ManagerEmployees />} />
+          <Route path="/admin/hotels" element={<ManagerHotels />} />
+          <Route path="/admin/*" element={<ComingSoon title="Chức năng (Admin)" />} />
 
           {/* Đường dẫn sai cấu trúc sẽ đẩy về Login */}
           <Route path="*" element={<Navigate to="/login" replace />} />

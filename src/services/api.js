@@ -122,3 +122,8 @@ export const housekeepingService = {
   reportMaintenance: (roomId) => api.post('/housekeeping/maintenance', { roomId }),
   markCleaned: (roomId) => api.post('/housekeeping/cleaned', { roomId }),
 };
+
+// Manager
+export const managerService = {
+  getDashboard: () => api.get('/manager/dashboard'),
+};
