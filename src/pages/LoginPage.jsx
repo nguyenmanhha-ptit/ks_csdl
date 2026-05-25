@@ -24,6 +24,7 @@ export default function LoginPage() {
       navigate(ROLE_REDIRECTS[user.role] || '/');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Đăng nhập thất bại');
+      setForm({ identifier: '', password: '' });
     } finally {
       setLoading(false);
     }
@@ -87,11 +88,13 @@ export default function LoginPage() {
             </div>
 
             <div className="mt-4 p-3 bg-gray-800/50 rounded-lg">
-              <p className="text-xs text-gray-500 font-medium mb-2">Demo accounts:</p>
-              <div className="space-y-1 text-xs text-gray-400">
-                <p>Admin: <span className="text-gray-300">admin / Admin@123</span></p>
-                <p>Manager: <span className="text-gray-300">manager1 / Manager@123</span></p>
-                <p>Receptionist: <span className="text-gray-300">receptionist1 / Recep@123</span></p>
+              <p className="text-xs text-gray-500 font-medium mb-2">Tài khoản Demo:</p>
+              <div className="grid grid-cols-2 gap-2 text-xs text-gray-400">
+                <p>Admin:<br/><span className="text-gray-300">admin / Admin@123</span></p>
+                <p>Manager:<br/><span className="text-gray-300">manager1 / Manager@123</span></p>
+                <p>Receptionist:<br/><span className="text-gray-300">receptionist1 / Recep@123</span></p>
+                <p>Housekeeping:<br/><span className="text-gray-300">housekeeping1 / House@123</span></p>
+                <p>Customer:<br/><span className="text-gray-300">customer1 / Cust@123</span></p>
               </div>
             </div>
           </div>

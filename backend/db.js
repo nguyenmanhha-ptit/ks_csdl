@@ -74,7 +74,11 @@ async function setupDatabase() {
       INSERT INTO Employees (FullName, Username, PasswordHash, Role, Email) VALUES 
       ('Admin Demo', 'admin', 'Admin@123', 'Admin', 'admin@luxstay.com'),
       ('Manager Demo', 'manager1', 'Manager@123', 'Manager', 'manager@luxstay.com'),
-      ('Receptionist Demo', 'receptionist1', 'Recep@123', 'Receptionist', 'recep@luxstay.com');
+      ('Receptionist Demo', 'receptionist1', 'Recep@123', 'Receptionist', 'recep@luxstay.com'),
+      ('Housekeeping Demo', 'housekeeping1', 'House@123', 'Housekeeping', 'house@luxstay.com');
+
+      INSERT INTO Customers (FullName, Phone, Email, PasswordHash, Nationality) VALUES
+      ('Customer Demo', 'customer1', 'customer1@luxstay.com', 'Cust@123', 'Vietnam');
 
       INSERT INTO Hotels (HotelName, StarRating, City, Country) VALUES
       ('LuxStay Hà Nội', 5, 'Hà Nội', 'Vietnam'),

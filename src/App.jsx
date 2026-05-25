@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './store/AuthContext';
 import { Toaster } from 'react-hot-toast';
+import DashboardLayout from './components/layout/DashboardLayout';
 
 // Import các trang giao diện
 import LoginPage from './pages/LoginPage';
@@ -20,6 +21,16 @@ import {
   CustomerProfile 
 } from './pages/CustomerPages';
 
+const ComingSoon = ({ title }) => (
+  <DashboardLayout>
+    <div className="flex flex-col items-center justify-center h-full text-center py-20">
+      <div className="text-6xl mb-4">🚧</div>
+      <h1 className="text-3xl font-display font-bold text-white mb-2">Phân hệ {title}</h1>
+      <p className="text-gray-400">Giao diện này đang được phát triển. Vui lòng quay lại sau!</p>
+    </div>
+  </DashboardLayout>
+);
+
 export default function App() {
   return (
     <AuthProvider>
@@ -37,6 +48,7 @@ export default function App() {
           <Route path="/receptionist/bookings" element={<ReceptionistBookings />} />
           <Route path="/receptionist/checkin" element={<ReceptionistCheckIn />} />
           <Route path="/receptionist/stays" element={<ReceptionistStays />} />
+          <Route path="/receptionist/services" element={<ComingSoon title="Dịch vụ (Lễ tân)" />} />
 
           {/* Phân hệ Khách hàng (Customer) */}
           <Route path="/customer" element={<CustomerHome />} />
@@ -45,6 +57,11 @@ export default function App() {
           <Route path="/customer/bookings" element={<CustomerBookings />} />
           <Route path="/customer/favorites" element={<CustomerFavorites />} />
           <Route path="/customer/profile" element={<CustomerProfile />} />
+
+          {/* Các phân hệ chưa có giao diện chi tiết */}
+          <Route path="/admin/*" element={<ComingSoon title="Admin" />} />
+          <Route path="/manager/*" element={<ComingSoon title="Quản lý (Manager)" />} />
+          <Route path="/housekeeping/*" element={<ComingSoon title="Buồng phòng (Housekeeping)" />} />
 
           {/* Đường dẫn sai cấu trúc sẽ đẩy về Login */}
           <Route path="*" element={<Navigate to="/login" replace />} />
